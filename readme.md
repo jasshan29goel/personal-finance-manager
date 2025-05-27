@@ -14,4 +14,6 @@ This is a personal finance manager, which reads your gmail, parses statements an
 - Download the credentials.json file from that project and keep it in the working directory of your github repo.
 (This is already added to your .gitignore of the project)
 
+- while running the script for the first time it would redirect to chrome and ask for permissions. From second time onwards the inbuilt token.json would be used for such work. Also make sure to use the same gmail account everywhere. 
+
 

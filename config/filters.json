@@ -1,0 +1,34 @@
+{
+  "accounts": [
+    {
+      "id": "hdfc_bank_account",
+      "from": ["hdfcbanksmartstatement@hdfcbank.net"],
+      "subject_keywords": ["HDFC Bank Combined Email Statement"]
+    },
+    {
+        "id": "sbi_credit_card",
+        "from": ["Statements@sbicard.com"],
+        "subject_keywords": ["SimplySAVE - SBI Card Monthly Statement"]
+    },
+    {
+        "id": "axis_credit_card",
+        "from": ["cc.statements@axisbank.com"],
+        "subject_keywords": ["Airtel Axis Bank Mastercard Credit Card Statement ending XX24"]
+    },
+    {
+        "id": "amazon_credit_card",
+        "from": ["credit_cards@icicibank.com"],
+        "subject_keywords": ["Amazon Pay ICICI Bank Credit Card Statement"]
+    },
+    {
+        "id": "swiggy_credit_card",
+        "from": ["Emailstatements.cards@hdfcbank.net"],
+        "subject_keywords": ["Swiggy HDFC Bank Credit Card Statement"]
+    },
+    {
+        "id": "hdfc_credit_card",
+        "from": ["Emailstatements.cards@hdfcbank.net"],
+        "subject_keywords": ["HDFC Bank Regalia Gold Credit Card Statement"]
+    }
+  ]
+}

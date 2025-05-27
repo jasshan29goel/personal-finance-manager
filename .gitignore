@@ -1,4 +1,7 @@
 credentials.json
 token.json
+pdf_passwords.json
+service_account.json
+output_pdfs/
 env/
 __pycache__/
