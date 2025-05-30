@@ -1,0 +1,117 @@
+{
+  "email_configs": [
+    {
+      "id": "hdfc_bank_account",
+      "from": ["hdfcbanksmartstatement@hdfcbank.net"],
+      "subject_keywords": ["HDFC Bank Combined Email Statement"],
+      "field_parsers": {
+        "transactions": {
+          "source": "attachment",
+          "chunking": {
+            "type": "table",
+            "required_headers": ["Txn Date"]
+          },
+          "processor": "llm:default"
+        }
+      },
+      "run": true 
+    },
+    {
+      "id": "sbi_bank_account",
+      "from": ["cbssbi.cas@alerts.sbi.co.in"],
+      "subject_keywords": ["account statement for your SBI account"],
+      "field_parsers": {
+        "transactions": {
+          "source": "attachment",
+          "chunking": {
+            "type": "table",
+            "required_headers": ["Transaction Reference"]
+          },
+          "processor": "llm:default"
+        }
+      },
+      "run": true 
+    },
+    {
+      "id": "sbi_credit_card",
+      "from": ["Statements@sbicard.com"],
+      "subject_keywords": ["SimplySAVE - SBI Card Monthly Statement"],
+      "field_parsers": {
+        "transactions": {
+          "source": "attachment",
+          "chunking": {
+            "type": "table",
+            "required_headers": ["Transaction Details"]
+          },
+          "processor": "llm:default"
+        }
+      },
+      "run": true 
+    },
+    {
+      "id": "axis_credit_card",
+      "from": ["cc.statements@axisbank.com"],
+      "subject_keywords": ["Airtel Axis Bank Mastercard Credit Card Statement ending XX24"],
+      "field_parsers": {
+        "transactions": {
+          "source": "attachment",
+          "chunking": {
+            "type": "table",
+            "required_headers": ["TRANSACTION DETAILS"]
+          },
+          "processor": "llm:default"
+        }
+      },
+      "run": true 
+    },
+    {
+      "id": "amazon_credit_card",
+      "from": ["credit_cards@icicibank.com"],
+      "subject_keywords": ["Amazon Pay ICICI Bank Credit Card Statement"],
+      "field_parsers": {
+        "transactions": {
+          "source": "attachment",
+          "chunking": {
+            "type": "between",
+            "start": "CREDIT SUMMARY",
+            "end": "IMPORTANT MESSAGES"
+          },
+          "processor": "llm:default"
+        }
+      },
+      "run": true 
+    },
+    {
+      "id": "swiggy_credit_card",
+      "from": ["Emailstatements.cards@hdfcbank.net"],
+      "subject_keywords": ["Swiggy HDFC Bank Credit Card Statement"],
+      "field_parsers": {
+        "transactions": {
+          "source": "attachment",
+          "chunking": {
+            "type": "table",
+            "required_headers": ["Transaction Description", "Date", "Amount"]
+          },
+          "processor": "llm:default"
+        }
+      },
+      "run": true 
+    },
+    {
+      "id": "hdfc_credit_card",
+      "from": ["Emailstatements.cards@hdfcbank.net"],
+      "subject_keywords": ["HDFC Bank Regalia Gold Credit Card Statement"],
+      "field_parsers": {
+        "transactions": {
+          "source": "attachment",
+          "chunking": {
+            "type": "table",
+            "required_headers": ["Transaction Description"]
+          },
+          "processor": "llm:default"
+        }
+      },
+      "run": true 
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+from typing import List, Optional
+from pydantic import BaseModel
+from domain.transaction import Transaction
+
+class ParsedEmail(BaseModel):
+    message_id: str                  # For tracking
+    email_date: str                  # YYYY-MM-DD
+    account_id: str                  # From EmailConfig.id
+    confidence: float
+
+    transactions: Optional[List[Transaction]] = None
+
+    status: str                      # success / failed
+    error_message: Optional[str] = None

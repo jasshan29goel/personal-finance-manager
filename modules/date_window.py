@@ -22,7 +22,7 @@ def get_next_week_window():
 
     # Define next window
     start = last_end + timedelta(days=1)
-    end = start + timedelta(days=6)
+    end = start + timedelta(days=10)
 
     return start.date(), end.date()
 

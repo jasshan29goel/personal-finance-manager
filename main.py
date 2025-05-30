@@ -1,50 +1,44 @@
+import json
 from modules.gmail_auth import get_gmail_service
 from modules.date_window import get_next_week_window, update_state_with_end_date
-from modules.email_filter import fetch_filtered_emails
-from modules.pdf_unlocker import extract_pdf_attachments
-from modules.pdf_parser import extract_transactions_from_pdf
-from modules.sheets_writer import connect_to_sheet, append_transactions_from_parsed_pdfs
+from modules.email_service import get_matching_emails
+from modules.email_parser_service import parse_emails
+from modules.sheet_service import SheetService
+from utils import load_email_configs
 
-import os
+EMAIL_CONFIGS_PATH = 'config/email_configs.json'
 
-OUTPUT_DIR = 'output_pdfs'
-
-def get_unlocked_pdfs():
-    return [
-        os.path.join(OUTPUT_DIR, f)
-        for f in os.listdir(OUTPUT_DIR)
-        if f.endswith('.pdf')
-    ]
-
-"""
-Step 0: get date range. 
-Step 1: Conenct to gmail services.
-Step 2: Filter mails based on filter config.
-Step 3: get attachements of filtered mails and save the unlocked files in the directory. 
-
-Step Last: update the date range, in state once processing is done.
-"""
 def main():
+    # Step 0: Get date range
     start_date, end_date = get_next_week_window()
-    print(f"Looking for emails from {start_date} to {end_date}")
-    service = get_gmail_service()
-    matched_emails = fetch_filtered_emails(service, start_date, end_date)
-    extract_pdf_attachments(service, matched_emails)
+    print(f"📅 Looking for emails from {start_date} to {end_date}")
 
-    unlocked_pdfs_path = get_unlocked_pdfs()
+    # Step 1: Connect to Gmail and Google Sheets
+    gmail_service = get_gmail_service()
+    sheet_service = SheetService()
 
-    parsed_results = []
-    for pdf in unlocked_pdfs_path:
-        parsed = extract_transactions_from_pdf(pdf, False)
-        parsed_results.append(parsed)
+    # Step 2: Load configs and connect to Google Sheets
+    email_configs = load_email_configs(EMAIL_CONFIGS_PATH)
 
-    sheet = connect_to_sheet()
-    append_transactions_from_parsed_pdfs(sheet, parsed_results)
+    # Step 3: Filter matching emails
+    emails = get_matching_emails(gmail_service, email_configs, start_date, end_date)
+    print(f"📬 Found {len(emails)} matching emails")
 
-    #update_state_with_end_date(end_date)
+    # Step 4: Filter out emails which have already been processed
+    filtered_emails = sheet_service.filter_out_already_processed_emails(emails)
+    print(f"📬 Processing {len(filtered_emails)} emails after filtering")
+
+    # Step 5: Parse matched emails into structured results
+    parsed_emails = parse_emails(filtered_emails, gmail_service)
+    print(f"✅ Parsed {len(parsed_emails)} emails")
+
+    # Step 6: Write to Google Sheets
+    sheet_service.write_parsed_email_to_google_sheets(parsed_emails)
+    print("📤 Results written to Google Sheets")
+
+    # Step 7: Update state
+    # update_state_with_end_date(end_date)
+
 
 if __name__ == '__main__':
     main()
-
-
-
