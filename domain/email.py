@@ -26,6 +26,9 @@ class Email:
     def get_filename_prefix(self) -> str:
         return f"{self.config.id}_{self.get_email_date()}"
 
-
+    def __lt__(self, other: "Email") -> bool:
+        if not isinstance(other, Email):
+            return NotImplemented
+        return self.get_filename_prefix() < other.get_filename_prefix()
 
 

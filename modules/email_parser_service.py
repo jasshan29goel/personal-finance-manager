@@ -1,16 +1,15 @@
 from typing import List, Any
 from domain.email import Email
 from domain.parsed_email import ParsedEmail
-from domain.field_parser_config import FieldParserConfig
 from modules.attachment_service import save_unlocked_attachment_pdf
 from modules.extract_from_pdf import apply_extraction
 from modules.content_processor_service import process_field
-# from modules.processing import process_field  # placeholder
+from utils import write_strings_to_file, count_tokens
 
 def parse_emails(emails: List[Email], gmail_service: Any) -> List[ParsedEmail]:
     parsed_emails: List[ParsedEmail] = []
 
-    for email in emails:
+    for email in sorted(emails):
         try:
             field_outputs = {}
             confidences = []
@@ -23,6 +22,9 @@ def parse_emails(emails: List[Email], gmail_service: Any) -> List[ParsedEmail]:
                     raise ValueError(f"Unsupported source: {field_config.source}")
 
                 # Step 2: Process the chunk
+                # print(str(extracted_content))
+                # print(count_tokens(str(extracted_content)))
+                # write_strings_to_file(extracted_content, 'output.txt')
                 result, confidence = process_field(field_name, extracted_content, field_config.processor)
                 confidences.append(confidence)
                 field_outputs[field_name] = result

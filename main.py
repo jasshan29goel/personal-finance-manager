@@ -4,9 +4,32 @@ from modules.date_window import get_next_week_window, update_state_with_end_date
 from modules.email_service import get_matching_emails
 from modules.email_parser_service import parse_emails
 from modules.sheet_service import SheetService
+from modules.post_processor import PostProcessor
 from utils import load_email_configs
-
+from modules.validator import validate_parsed_emails
+from pprint import pprint
 EMAIL_CONFIGS_PATH = 'config/email_configs.json'
+
+SAVED_PARSED_EMAILS_PATH = 'parsed_email_dump.json'
+
+from typing import List
+from domain.parsed_email import ParsedEmail
+
+# This would run once after generating the ParsedEmail list
+def save_parsed_emails_to_disk(parsed_emails: List[ParsedEmail], path: str):
+    with open(path, "w", encoding="utf-8") as f:
+        data = [email.model_dump() for email in parsed_emails]
+        import json
+        json.dump(data, f, indent=2)
+
+
+def load_parsed_emails_from_disk(path: str) -> List[ParsedEmail]:
+    from domain.parsed_email import ParsedEmail
+    import json
+
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        return [ParsedEmail(**item) for item in data]
 
 def main():
     # Step 0: Get date range
@@ -17,14 +40,16 @@ def main():
     gmail_service = get_gmail_service()
     sheet_service = SheetService()
 
-    # Step 2: Load configs and connect to Google Sheets
+    # Step 2: Load configs for email matching and categories
     email_configs = load_email_configs(EMAIL_CONFIGS_PATH)
+    post_processor = PostProcessor(sheet_service.load_category_rules())
+    print(len(post_processor.rules))
 
     # Step 3: Filter matching emails
     emails = get_matching_emails(gmail_service, email_configs, start_date, end_date)
     print(f"📬 Found {len(emails)} matching emails")
 
-    # Step 4: Filter out emails which have already been processed
+    # # Step 4: Filter out emails which have already been processed
     filtered_emails = sheet_service.filter_out_already_processed_emails(emails)
     print(f"📬 Processing {len(filtered_emails)} emails after filtering")
 
@@ -32,8 +57,22 @@ def main():
     parsed_emails = parse_emails(filtered_emails, gmail_service)
     print(f"✅ Parsed {len(parsed_emails)} emails")
 
-    # Step 6: Write to Google Sheets
-    sheet_service.write_parsed_email_to_google_sheets(parsed_emails)
+    save_parsed_emails_to_disk(parsed_emails, SAVED_PARSED_EMAILS_PATH)
+
+    parsed_emails_from_disk = load_parsed_emails_from_disk(SAVED_PARSED_EMAILS_PATH)
+
+    # Step 6: Do post processing on the structured parsed_emails output.
+    post_processed_parsed_emails = post_processor.process_all(parsed_emails_from_disk)
+
+    mismatches = validate_parsed_emails("evals/expected_response.json", parsed_emails)
+
+    if mismatches:
+        print("❌ Mismatches found:")
+        pprint(mismatches)
+    else:
+        print("✅ All transactions match!")
+        # Step 7: Write to Google Sheets
+    sheet_service.write_parsed_email_to_google_sheets(post_processed_parsed_emails)
     print("📤 Results written to Google Sheets")
 
     # Step 7: Update state

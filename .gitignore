@@ -5,4 +5,7 @@ service_account.json
 output_pdfs/
 env/
 .env
+parsed_email_dump.json
+output.txt
+evals/
 __pycache__/

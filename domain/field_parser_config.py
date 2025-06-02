@@ -1,28 +1,29 @@
 from typing import Union
 from pydantic import BaseModel
-from typing import List, Literal
-
-class TableChunkingConfig(BaseModel):
-    type: Literal['table']
-    required_headers: List[str]
+from typing import List, Literal, Optional
 
 class BetweenChunkingConfig(BaseModel):
     type: Literal['between']
     start: str
-    end: str
-
-class PageRangeChunkingConfig(BaseModel):
-    type: Literal['page_range']
-    start_page: int
-    end_page: int
+    end: Optional[str]
 
 ChunkingConfig = Union[
-    TableChunkingConfig,
-    BetweenChunkingConfig,
-    PageRangeChunkingConfig
+    BetweenChunkingConfig
+]
+
+class LLMProcessorConfig(BaseModel):
+    type: Literal['llm']
+    model: str = "gpt-4.1-mini"
+
+class NOOPProcessorConfig(BaseModel):
+    type: Literal['noop']
+
+ProcessorConfig = Union[
+    LLMProcessorConfig,
+    NOOPProcessorConfig
 ]
 
 class FieldParserConfig(BaseModel):
     source: Literal['attachment', 'email_body']
     chunking: ChunkingConfig
-    processor: str
+    processor: ProcessorConfig

@@ -3,6 +3,7 @@ from google.oauth2.service_account import Credentials
 from typing import List
 from domain.email import Email
 from domain.parsed_email import ParsedEmail
+from domain.category_rule import CategoryRule
 
 SERVICE_ACCOUNT_FILE = 'creds/service_account.json'
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -20,9 +21,11 @@ class SheetService:
             spreadsheet = client.open_by_key(SPREADSHEET_ID)
             self.transaction_sheet = spreadsheet.worksheet('transactions')
             self.status_sheet = spreadsheet.worksheet('status')
+            self.category_rules = spreadsheet.worksheet('category_rules')
 
         except Exception as e:
             raise RuntimeError(f"❌ Failed to connect to Google Sheets: {e}")
+
 
     def filter_out_already_processed_emails(self, emails: List[Email]) -> List[Email]:
         try:
@@ -40,7 +43,7 @@ class SheetService:
         for email in parsed_emails:
             if email.transactions:
                 for txn in email.transactions:
-                    transaction_rows.append(txn.to_row())
+                    transaction_rows.append([email.account_id] + txn.to_row())
 
             status_rows.append([
                 email.message_id,
@@ -60,3 +63,11 @@ class SheetService:
 
         if status_rows:
             self.status_sheet.append_rows(status_rows, value_input_option="USER_ENTERED")  # type: ignore
+
+    def load_category_rules(self) -> List[CategoryRule]:
+        try:
+            rows = self.category_rules.get_all_records()
+            rules = [CategoryRule.from_sheet_row(row) for row in rows]
+            return sorted(rules, key=lambda r: r.priority)
+        except Exception as e:
+            raise RuntimeError(f"❌ Failed to load category rules: {e}")

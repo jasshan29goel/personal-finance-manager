@@ -8,10 +8,13 @@
         "transactions": {
           "source": "attachment",
           "chunking": {
-            "type": "table",
-            "required_headers": ["Txn Date"]
+            "type": "between",
+            "start": "Txn Date",
+            "end": null
           },
-          "processor": "llm:default"
+          "processor": {
+            "type": "llm"
+          }
         }
       },
       "run": true 
@@ -24,10 +27,13 @@
         "transactions": {
           "source": "attachment",
           "chunking": {
-            "type": "table",
-            "required_headers": ["Transaction Reference"]
+            "type": "between",
+            "start": "TRANSACTION OVERVIEW",
+            "end": null
           },
-          "processor": "llm:default"
+          "processor": {
+            "type": "llm"
+          }
         }
       },
       "run": true 
@@ -40,10 +46,13 @@
         "transactions": {
           "source": "attachment",
           "chunking": {
-            "type": "table",
-            "required_headers": ["Transaction Details"]
+            "type": "between",
+            "start": "ACCOUNT SUMMARY",
+            "end": null
           },
-          "processor": "llm:default"
+          "processor": {
+            "type": "llm"
+          }
         }
       },
       "run": true 
@@ -55,11 +64,14 @@
       "field_parsers": {
         "transactions": {
           "source": "attachment",
-          "chunking": {
-            "type": "table",
-            "required_headers": ["TRANSACTION DETAILS"]
+           "chunking": {
+            "type": "between",
+            "start": "Account Summary",
+            "end": "End of Statement"
           },
-          "processor": "llm:default"
+          "processor": {
+            "type": "llm"
+          }
         }
       },
       "run": true 
@@ -74,9 +86,11 @@
           "chunking": {
             "type": "between",
             "start": "CREDIT SUMMARY",
-            "end": "IMPORTANT MESSAGES"
+            "end": null
           },
-          "processor": "llm:default"
+          "processor": {
+            "type": "llm"
+          }
         }
       },
       "run": true 
@@ -89,26 +103,32 @@
         "transactions": {
           "source": "attachment",
           "chunking": {
-            "type": "table",
-            "required_headers": ["Transaction Description", "Date", "Amount"]
+            "type": "between",
+            "start": "Transactions",
+            "end": null
           },
-          "processor": "llm:default"
+          "processor": {
+            "type": "llm"
+          }
         }
       },
       "run": true 
     },
     {
-      "id": "hdfc_credit_card",
+      "id": "hdfc_regalia_gold_credit_card",
       "from": ["Emailstatements.cards@hdfcbank.net"],
       "subject_keywords": ["HDFC Bank Regalia Gold Credit Card Statement"],
       "field_parsers": {
         "transactions": {
           "source": "attachment",
           "chunking": {
-            "type": "table",
-            "required_headers": ["Transaction Description"]
+            "type": "between",
+            "start": "Transactions",
+            "end": null
           },
-          "processor": "llm:default"
+          "processor": {
+            "type": "llm"
+          }
         }
       },
       "run": true 
