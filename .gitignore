@@ -7,5 +7,6 @@ env/
 .env
 parsed_email_dump.json
 output.txt
+temp.py
 evals/
 __pycache__/

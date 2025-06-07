@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 
 STATE_FILE = 'state/state.json'
-DATE_FORMAT = '%Y-%m-%d'
+MONTH_FORMAT = '%Y-%m'
 
 def load_state():
     if not os.path.exists(STATE_FILE):
@@ -15,17 +15,29 @@ def save_state(state):
     with open(STATE_FILE, 'w') as f:
         json.dump(state, f, indent=2)
 
-def get_next_week_window():
+def get_window_from_month():
     state = load_state()
-    last_end_str = state['last_run_end']
-    last_end = datetime.strptime(last_end_str, DATE_FORMAT)
 
-    # Define next window
-    start = last_end + timedelta(days=1)
+    if 'month_to_run' not in state:
+        raise KeyError("Missing 'month_to_run' in state.json. Expected format: 'YYYY-MM'.")
+
+    month_str = state['month_to_run']
+    try:
+        start = datetime.strptime(month_str, MONTH_FORMAT)
+    except ValueError:
+        raise ValueError("Invalid 'month_to_run' format. Expected 'YYYY-MM'.")
+
     end = start + timedelta(days=10)
 
     return start.date(), end.date()
 
-def update_state_with_end_date(end_date):
-    state = {'last_run_end': end_date.strftime(DATE_FORMAT)}
+def update_state_with_next_month(start_date):
+    # Compute the first day of the next month
+    if start_date.month == 12:
+        next_month = datetime(start_date.year + 1, 1, 1)
+    else:
+        next_month = datetime(start_date.year, start_date.month + 1, 1)
+
+    state = load_state()
+    state['month_to_run'] = next_month.strftime(MONTH_FORMAT)
     save_state(state)

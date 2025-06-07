@@ -1,5 +1,7 @@
 from typing import List, Dict, Optional
-from .field_parser_config import FieldParserConfig
+from .field_parser.field_parser_config import FieldParserConfig
+from pydantic import TypeAdapter
+field_parser_adapter = TypeAdapter(FieldParserConfig)
 
 class EmailConfig:
     def __init__(
@@ -31,7 +33,7 @@ class EmailConfig:
     def from_dict(cls, raw: dict):
         raw_field_parsers = raw.get("field_parsers", {})
         parsed_field_parsers = {
-            key: FieldParserConfig(**value)
+            key: field_parser_adapter.validate_python(value)
             for key, value in raw_field_parsers.items()
         }
         return cls(

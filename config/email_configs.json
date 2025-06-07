@@ -5,9 +5,20 @@
       "from": ["hdfcbanksmartstatement@hdfcbank.net"],
       "subject_keywords": ["HDFC Bank Combined Email Statement"],
       "field_parsers": {
+         "closing_balance": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
+            "type": "float_near_keyword",
+            "keyword": "SAVINGS ACCOUNTS",
+            "location": "RIGHT"
+          },
+          "processor": {
+            "type": "noop"
+          }
+        },
         "transactions": {
-          "source": "attachment",
-          "chunking": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
             "type": "between",
             "start": "Txn Date",
             "end": null
@@ -24,9 +35,20 @@
       "from": ["cbssbi.cas@alerts.sbi.co.in"],
       "subject_keywords": ["account statement for your SBI account"],
       "field_parsers": {
+        "closing_balance": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
+            "type": "float_near_keyword",
+            "keyword": "Current Balance",
+            "location": "BELOW"
+          },
+          "processor": {
+            "type": "noop"
+          }
+        },
         "transactions": {
-          "source": "attachment",
-          "chunking": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
             "type": "between",
             "start": "TRANSACTION OVERVIEW",
             "end": null
@@ -43,9 +65,20 @@
       "from": ["Statements@sbicard.com"],
       "subject_keywords": ["SimplySAVE - SBI Card Monthly Statement"],
       "field_parsers": {
+        "total_amount_due": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
+            "type": "float_near_keyword",
+            "keyword": "*Total Amount Due",
+            "location": "BELOW"
+          },
+          "processor": {
+            "type": "noop"
+          }
+        },
         "transactions": {
-          "source": "attachment",
-          "chunking": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
             "type": "between",
             "start": "ACCOUNT SUMMARY",
             "end": null
@@ -62,9 +95,20 @@
       "from": ["cc.statements@axisbank.com"],
       "subject_keywords": ["Airtel Axis Bank Mastercard Credit Card Statement ending XX24"],
       "field_parsers": {
+        "total_amount_due": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
+            "type": "float_near_keyword",
+            "keyword": "Total Payment Due",
+            "location": "BELOW"
+          },
+          "processor": {
+            "type": "noop"
+          }
+        },
         "transactions": {
-          "source": "attachment",
-           "chunking": {
+          "type": "pdf_attachment",
+           "pdf_extractor": {
             "type": "between",
             "start": "Account Summary",
             "end": "End of Statement"
@@ -81,9 +125,20 @@
       "from": ["credit_cards@icicibank.com"],
       "subject_keywords": ["Amazon Pay ICICI Bank Credit Card Statement"],
       "field_parsers": {
+        "total_amount_due": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
+            "type": "float_near_keyword",
+            "keyword": "Total Amount Due",
+            "location": "BELOW"
+          },
+          "processor": {
+            "type": "noop"
+          }
+        },
         "transactions": {
-          "source": "attachment",
-          "chunking": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
             "type": "between",
             "start": "CREDIT SUMMARY",
             "end": null
@@ -100,9 +155,20 @@
       "from": ["Emailstatements.cards@hdfcbank.net"],
       "subject_keywords": ["Swiggy HDFC Bank Credit Card Statement"],
       "field_parsers": {
+        "total_amount_due": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
+            "type": "float_near_keyword",
+            "keyword": "Total Dues",
+            "location": "BELOW"
+          },
+          "processor": {
+            "type": "noop"
+          }
+        },
         "transactions": {
-          "source": "attachment",
-          "chunking": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
             "type": "between",
             "start": "Transactions",
             "end": null
@@ -119,9 +185,20 @@
       "from": ["Emailstatements.cards@hdfcbank.net"],
       "subject_keywords": ["HDFC Bank Regalia Gold Credit Card Statement"],
       "field_parsers": {
+        "total_amount_due": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
+            "type": "float_near_keyword",
+            "keyword": "Total Dues",
+            "location": "BELOW"
+          },
+          "processor": {
+            "type": "noop"
+          }
+        },
         "transactions": {
-          "source": "attachment",
-          "chunking": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
             "type": "between",
             "start": "Transactions",
             "end": null

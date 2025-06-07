@@ -1,21 +1,19 @@
 import os
 import json
-from typing import Any, List
-
+from typing import Any, List, Literal
+from datetime import datetime
 import openai
 from dotenv import load_dotenv
+import tiktoken
+
 from domain.transaction import Transaction
-from domain.field_parser_config import ProcessorConfig, NOOPProcessorConfig, LLMProcessorConfig
-from utils import count_tokens, append_eval_jsonl
-from datetime import datetime
+from domain.field_parser.field_processors.base_processor_config import BaseProcessorConfig
 
 load_dotenv()
 
 client = openai.OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
 
 JSONL_EVAL_PATH = "evals/current.jsonl"
-
-
 
 today_str = datetime.now().strftime("%Y-%m-%d")
 
@@ -78,25 +76,56 @@ TRANSACTION_SCHEMA = {
     "additionalProperties": False
 }
 
-def process_field(field_name: str, chunk: Any, processor_config: ProcessorConfig) -> Any:
-    if field_name == "transactions":
-        return _process_transactions(chunk, processor_config)
-    else:
-        raise ValueError(f"Unsupported field: {field_name}")
+def count_tokens(text: str, model: str = "gpt-4") -> int:
+    """
+    Returns the number of tokens in the input text for a given OpenAI model.
 
-def _process_transactions(chunk: Any, processor_config: ProcessorConfig) -> tuple[List[Transaction], float]:
-    if isinstance(processor_config, NOOPProcessorConfig):
-        return [], 0 # nothing to do.
-    
-    if isinstance(processor_config, LLMProcessorConfig):
+    Args:
+        text (str): The input string to count tokens for.
+        model (str): The name of the OpenAI model (e.g., 'gpt-4', 'gpt-3.5-turbo').
 
-        input_query = str(chunk)
-        
-        print(f"📤 Running {processor_config.model} responses api for {count_tokens(input_query)} tokens")
+    Returns:
+        int: The number of tokens in the input text.
+    """
+    encoding = tiktoken.encoding_for_model(model)
+    return len(encoding.encode(text))
+
+def append_eval_jsonl(system_message: str, query, ideal, filepath: str):
+    """
+    Appends a row to a JSONL file for OpenAI evals.
+
+    Parameters:
+        system_message (str): The system prompt.
+        query (Any): The user query (can be any JSON-serializable type).
+        ideal (Any): The expected output (can be any JSON-serializable type).
+        filepath (str): The path to the JSONL file.
+    """
+    entry = {
+        "input": {
+            "messages": [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": query}
+            ]
+        },
+        "ideal": ideal
+    }
+
+    with open(filepath, "a", encoding="utf-8") as f:
+        f.write("\n" + json.dumps(entry, ensure_ascii=False))
+
+class TransactionsProcessorUsingLLMConfig(BaseProcessorConfig):
+    type: Literal['llm']
+    model: str = "gpt-4.1-mini"
+
+    def process_field(self, field_name: str, extracted_content: Any) -> tuple[List[Transaction], str]:
+        if field_name != "transactions":
+            raise ValueError(f"{self.__class__.__name__} only supports 'transactions' field")
+
+        input_query = str(extracted_content)
         print(input_query)
 
         response = client.responses.create(
-            model=processor_config.model,
+            model=self.model,
             input=[
                 {
                     "role": "system",
@@ -137,8 +166,12 @@ def _process_transactions(chunk: Any, processor_config: ProcessorConfig) -> tupl
                 )
                 for txn in parsed["transactions"]
             ]
-            return transactions, parsed["confidence"]
+            confidence = parsed["confidence"]
+            llm_message = f"Extracting transactions via LLM. Confidence: {confidence}"
+            
+            print(f"📤 Running {self.model} responses api for {count_tokens(input_query)} input tokens")
+            print(f"📤 Running {self.model} responses api for {count_tokens(response.output_text)} output tokens")
+
+            return transactions, llm_message
         except (KeyError, ValueError, json.JSONDecodeError) as e:
             raise ValueError(f"Failed to parse LLM response: {e}")
-    
-    raise ValueError(f"Unsupported processor for transactions: {processor_config.type}")

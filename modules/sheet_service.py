@@ -43,15 +43,16 @@ class SheetService:
         for email in parsed_emails:
             if email.transactions:
                 for txn in email.transactions:
-                    transaction_rows.append([email.account_id] + txn.to_row())
+                    transaction_rows.append([email.message_id, email.account_id] + txn.to_row())
 
             status_rows.append([
                 email.message_id,
                 email.account_id,
                 email.email_date,
                 email.status,
-                str(email.confidence),
-                email.error_message or "",
+                str(email.total_amount_due),
+                str(email.closing_balance),
+                email.script_message or "",
             ])
 
         print(f"✅ Writing {len(transaction_rows)} transactions")
