@@ -50,7 +50,7 @@
           "type": "pdf_attachment",
           "pdf_extractor": {
             "type": "between",
-            "start": "TRANSACTION OVERVIEW",
+            "start": "Transaction Reference",
             "end": null
           },
           "processor": {
@@ -184,6 +184,36 @@
       "id": "hdfc_regalia_gold_credit_card",
       "from": ["Emailstatements.cards@hdfcbank.net"],
       "subject_keywords": ["HDFC Bank Regalia Gold Credit Card Statement"],
+      "field_parsers": {
+        "total_amount_due": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
+            "type": "float_near_keyword",
+            "keyword": "Total Dues",
+            "location": "BELOW"
+          },
+          "processor": {
+            "type": "noop"
+          }
+        },
+        "transactions": {
+          "type": "pdf_attachment",
+          "pdf_extractor": {
+            "type": "between",
+            "start": "Transactions",
+            "end": null
+          },
+          "processor": {
+            "type": "llm"
+          }
+        }
+      },
+      "run": true 
+    },
+    {
+      "id": "hdfc_dcb_metal_credit_card",
+      "from": ["Emailstatements.cards@hdfcbank.net"],
+      "subject_keywords": ["Diners Club International Credit Card Statement"],
       "field_parsers": {
         "total_amount_due": {
           "type": "pdf_attachment",

@@ -1,7 +1,3 @@
-Certainly! Based on the information available from the GitHub repository , here's a comprehensive README for the **Personal Finance Manager** project:
-
----
-
 # Personal Finance Manager
 
 **Personal Finance Manager** is a Python-based tool designed to automate the extraction of financial data from your Gmail account and organize it into structured Google Sheets. This facilitates efficient personal finance tracking by consolidating transaction details from various sources into a single, manageable spreadsheet.

@@ -1,11 +1,13 @@
 import json
+from typing import List
 from domain.email_config import EmailConfig
 from domain.parsed_email import ParsedEmail
-from typing import List
+from constants import EMAIL_CONFIGS
+
 
 def load_email_configs(path: str) -> list[EmailConfig]:
     with open(path, 'r') as f:
-        raw_accounts = json.load(f)['email_configs']
+        raw_accounts = json.load(f)[EMAIL_CONFIGS]
     email_configs = [EmailConfig.from_dict(account) for account in raw_accounts]
     filtered_configs = [config for config in email_configs if config.run]
     return sorted(filtered_configs, key=lambda email_config: email_config.id)
@@ -33,3 +35,7 @@ def load_parsed_emails_from_disk(path: str) -> List[ParsedEmail]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
         return [ParsedEmail(**item) for item in data]
+
+def log_and_collect(message: str, log_store: list[str]):
+    print(message)
+    log_store.append(message)

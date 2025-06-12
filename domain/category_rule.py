@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
-from domain.constants import CategoryType, TransactionType
+from typing import Optional
+from constants import CategoryType, TransactionType
 from domain.transaction import Transaction
 from domain.parsed_email import ParsedEmail
 

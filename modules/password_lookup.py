@@ -1,6 +1,5 @@
 import json
-
-PDF_PASSWORDS_PATH = 'creds/pdf_passwords.json'
+from constants import PDF_PASSWORDS_PATH
 
 def load_passwords():
     with open(PDF_PASSWORDS_PATH, 'r') as f:

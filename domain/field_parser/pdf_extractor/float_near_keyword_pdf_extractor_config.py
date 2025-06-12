@@ -1,8 +1,27 @@
-from domain.field_parser.pdf_extractor.base_pdf_extractor_config import BasePDFExtractorConfig
-from typing import Optional, List, Union, Any
-from typing import Literal
 import pdfplumber
 import re
+from typing import Optional
+from typing import Literal
+from domain.field_parser.pdf_extractor.base_pdf_extractor_config import BasePDFExtractorConfig
+
+
+# ✅ Matches:
+#   "₹1,234.56"        → Valid number with currency symbol and decimals
+#   "  -1,000"         → Valid negative number with leading space
+#   "$123"             → Valid integer with prefix
+#   "1,000"            → Valid comma-separated thousands
+#   "1000"             → Valid plain integer
+#   "123456.78"        → Valid plain decimal
+#   "-123.45"          → Valid negative decimal
+#
+# ❌ Does NOT match:
+#   "12,34"            → Incorrect comma grouping
+#   "1,23,456"         → Incorrect comma grouping
+#   "abc123"           → Letters before number not allowed unless non-digit
+#   "123abc"           → Letters after number not allowed
+#   "--123"            → Double negative sign not allowed
+#   "1 000"            → Space instead of comma not allowed
+#   "1,000.00.00"      → Multiple decimals not allowed
 
 CURRENCY_REGEX = re.compile(r"^[^\d\-]*([\-]?\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+(?:\.\d+)?)$")
 

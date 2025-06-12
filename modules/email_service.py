@@ -1,11 +1,10 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Any, List, Optional
 from domain.email import Email
 from domain.email_config import EmailConfig
+from constants import DATE_FORMAT
 
-DATE_FORMAT = '%Y-%m-%d'
-
-def build_query(start_date, end_date) -> str:
+def build_query(start_date: date, end_date: date) -> str:
     after_epoch = int(datetime.strptime(str(start_date), DATE_FORMAT).timestamp())
     before_epoch = int(datetime.strptime(str(end_date), DATE_FORMAT).timestamp()) + 86400
     return f"after:{after_epoch} before:{before_epoch} category:primary has:attachment"
@@ -20,7 +19,7 @@ def message_matches_filters(full_msg, email_configs: list[EmailConfig]) -> Optio
             return config
     return None
 
-def get_matching_emails(gmail_service: Any, email_configs: list[EmailConfig], start_date, end_date) -> List[Email]:
+def get_matching_emails(gmail_service: Any, email_configs: list[EmailConfig], start_date: date, end_date: date) -> List[Email]:
     query = build_query(start_date, end_date)
 
     result = gmail_service.users().messages().list(

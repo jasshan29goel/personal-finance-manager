@@ -1,28 +1,25 @@
 import os
 import json
+import openai
+import tiktoken
 from typing import Any, List, Literal
 from datetime import datetime
-import openai
 from dotenv import load_dotenv
-import tiktoken
 
 from domain.transaction import Transaction
 from domain.field_parser.field_processors.base_processor_config import BaseProcessorConfig
+from constants import DATE_FORMAT, JSONL_EVAL_PATH, OPEN_AI_API_KEY
 
 load_dotenv()
-
-client = openai.OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
-
-JSONL_EVAL_PATH = "evals/current.jsonl"
-
-today_str = datetime.now().strftime("%Y-%m-%d")
+client = openai.OpenAI(api_key=os.getenv(OPEN_AI_API_KEY))
+today_str = datetime.now().strftime(DATE_FORMAT)
 
 SYSTEM_MESSAGE = (
     "You extract structured transaction data from bank or credit card statements. "
     "The data was extracted using pdfplumber. Return a JSON object matching the provided schema. "
     "Do not guess missing or unclear values. Amounts must be greater than zero. "
     "Dates must be in YYYY-MM-DD format and must not be in the future. "
-    "If any field is ambiguous or incomplete, exclude the transaction and reduce the overall confidence accordingly. "
+    "If any field is ambiguous or incomplete reduce the overall confidence accordingly. "
     "Assume today's date is {today}."
 ).format(today=today_str)
 
@@ -167,11 +164,11 @@ class TransactionsProcessorUsingLLMConfig(BaseProcessorConfig):
                 for txn in parsed["transactions"]
             ]
             confidence = parsed["confidence"]
-            llm_message = f"Extracting transactions via LLM. Confidence: {confidence}"
+            llm_message = f"Extracting transactions: {len(transactions)} via LLM. Confidence: {confidence}"
+            llm_message += f"\n 📤 Running {self.model} responses api for {count_tokens(input_query)} input tokens"
+            llm_message += f"\n 📤 Running {self.model} responses api for {count_tokens(response.output_text)} output tokens"
             
-            print(f"📤 Running {self.model} responses api for {count_tokens(input_query)} input tokens")
-            print(f"📤 Running {self.model} responses api for {count_tokens(response.output_text)} output tokens")
-
+            print(llm_message)
             return transactions, llm_message
         except (KeyError, ValueError, json.JSONDecodeError) as e:
             raise ValueError(f"Failed to parse LLM response: {e}")

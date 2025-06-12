@@ -5,15 +5,15 @@ import pikepdf
 from typing import Any
 from domain.email import Email
 from modules.password_lookup import get_pdf_password
+from constants import PDF_OUTPUT_DIRECTORY
 
-OUTPUT_DIR = 'output_pdfs'
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(PDF_OUTPUT_DIRECTORY, exist_ok=True)
 
 def save_unlocked_attachment_pdf(email: Email, service: Any) -> str:
     message = email.message
     account_id = email.config.id
     filename = email.get_filename_prefix() + ".pdf"
-    unlocked_path = os.path.join(OUTPUT_DIR, filename)
+    unlocked_path = os.path.join(PDF_OUTPUT_DIRECTORY, filename)
 
     # Step 1: Check if already saved
     if os.path.exists(unlocked_path):

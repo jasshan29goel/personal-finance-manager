@@ -1,7 +1,7 @@
 from domain.category_rule import CategoryRule
 from domain.parsed_email import ParsedEmail
 from domain.transaction import Transaction
-from domain.constants import CategoryType
+from constants import CategoryType
 from typing import List
 
 class PostProcessor:
