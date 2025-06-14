@@ -1,5 +1,5 @@
 from typing import List, Dict, Optional
-from .field_parser.field_parser_config import FieldParserConfig
+from .field_parser_config import FieldParserConfig
 from pydantic import TypeAdapter
 field_parser_adapter = TypeAdapter(FieldParserConfig)
 

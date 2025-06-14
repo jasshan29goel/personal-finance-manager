@@ -2,6 +2,9 @@ from typing import List, Any
 from domain.email import Email
 from domain.parsed_email import ParsedEmail
 from modules.attachment_service import save_unlocked_attachment_pdf
+from modules.field_parser.extractor import extract_from_pdf
+from modules.field_parser.processor import process_field
+from modules.field_parser.field_parser_utils import post_validate
 
 def parse_emails(emails: List[Email], gmail_service: Any, execution_id: str) -> List[ParsedEmail]:
     parsed_emails: List[ParsedEmail] = []
@@ -13,10 +16,10 @@ def parse_emails(emails: List[Email], gmail_service: Any, execution_id: str) -> 
             for field_name, field_config in email.config.field_parsers.items():
                 # Step 1: Get the input text/table
                 if field_config.type == "pdf_attachment":
-                    pdf_path = save_unlocked_attachment_pdf(email, gmail_service) 
-                    extracted_content = field_config.pdf_extractor.extract_from_pdf(pdf_path=pdf_path)
-                    result, message = field_config.processor.process_field(field_name=field_name, extracted_content=extracted_content)
-                    field_config.post_validate(field_name, result, pdf_path)
+                    pdf_path = save_unlocked_attachment_pdf(email, gmail_service)
+                    extracted_content = extract_from_pdf(field_config.pdf_extractor, pdf_path)
+                    result, message = process_field(field_config.processor, field_name, extracted_content)
+                    post_validate(field_name, result, pdf_path)
                     field_outputs[field_name] = result
                     script_message += f"\n field: {field_name} message: {message}"
                 else:

@@ -1,5 +1,4 @@
 from domain.email_config import EmailConfig
-from datetime import datetime
 from email.utils import parsedate_to_datetime
 
 class Email:

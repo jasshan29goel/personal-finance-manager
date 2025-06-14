@@ -63,7 +63,7 @@ class EmailParsingPipeline:
             log="\n".join(log_store)
         )
         # Optional state update
-        # update_state_with_next_month(self.start_date)
+        update_state_with_next_month(self.start_date)
 
 if __name__ == '__main__':
     pipeline = EmailParsingPipeline()
