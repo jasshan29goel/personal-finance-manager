@@ -1,9 +1,15 @@
 import json
 from typing import List
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from domain.email_config import EmailConfig
 from domain.parsed_email import ParsedEmail
 from constants import EMAIL_CONFIGS
 
+def getStartEndDate(year, month):
+    start_date = datetime(year, month, 1)
+    end_date = start_date + relativedelta(months=1)
+    return start_date.date(), end_date.date()
 
 def load_email_configs(path: str) -> list[EmailConfig]:
     with open(path, 'r') as f:

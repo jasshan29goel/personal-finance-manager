@@ -19,9 +19,7 @@ SHEETS_SPREADSHEET_ID = '1sjJ0ip3VW6tHsqLpWHafgVf9SjXM60ccYjMC-gI8M6c'
 
 # constants which there should be no need to change
 OPEN_AI_API_KEY = 'OPEN_AI_API_KEY'
-MONTH_TO_RUN_FIELD = 'month_to_run'
 EMAIL_CONFIGS = 'email_configs'
-MONTH_FORMAT = '%Y-%m'
 DATE_FORMAT = '%Y-%m-%d'
 
 # ENUMS

@@ -1,18 +1,20 @@
 import uuid
 from datetime import datetime
 from modules.gmail_auth import get_gmail_service
-from modules.date_window import get_window_from_month, update_state_with_next_month
 from modules.email_service import get_matching_emails
 from modules.email_parser_service import parse_emails
 from modules.sheet_service import SheetService
 from modules.post_processor import PostProcessor
-from utils import load_email_configs, log_and_collect
+from utils import load_email_configs, log_and_collect, getStartEndDate
 from constants import EMAIL_CONFIGS_PATH, DATE_FORMAT
+
+YEAR = 2025
+MONTH = 6
 
 class EmailParsingPipeline:
     def __init__(self):
         # Step 0: Set up execution window and ID
-        self.start_date, self.end_date = get_window_from_month()
+        self.start_date, self.end_date = getStartEndDate(YEAR, MONTH)
         self.execution_id = str(uuid.uuid4())
         print(f"📅 Looking for emails from {self.start_date} to {self.end_date}")
         print(f"🔁 Execution ID: {self.execution_id}")
@@ -62,8 +64,6 @@ class EmailParsingPipeline:
             filtered_emails=len(filtered_emails),
             log="\n".join(log_store)
         )
-        # Optional state update
-        update_state_with_next_month(self.start_date)
 
 if __name__ == '__main__':
     pipeline = EmailParsingPipeline()

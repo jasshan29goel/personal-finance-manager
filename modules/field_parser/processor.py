@@ -79,60 +79,71 @@ def process_transactions_using_llm(config: TransactionsProcessorUsingLLMConfig, 
     if field_name != "transactions":
         raise ValueError(f"{config.__class__.__name__} only supports 'transactions' field")
 
-    input_query = str(extracted_content)
-    print(input_query)
+    inputs = extracted_content if isinstance(extracted_content, list) else [extracted_content]
 
-    response = client.responses.create(
-        model=config.model,
-        input=[
-            {
-                "role": "system",
-                "content": [{"type": "input_text", "text": SYSTEM_MESSAGE}]
+    all_transactions = []
+    all_messages = []
+
+    for input_query in inputs:
+        input_query = str(input_query)
+        print(input_query)
+
+        response = client.responses.create(
+            model=config.model,
+            input=[
+                {
+                    "role": "system",
+                    "content": [{"type": "input_text", "text": SYSTEM_MESSAGE}]
+                },
+                {
+                    "role": "user",
+                    "content": [{"type": "input_text", "text": input_query}]
+                }
+            ],
+            text={
+                "format": {
+                    "type": "json_schema",
+                    "name": "transaction_response",
+                    "schema": TRANSACTION_SCHEMA,
+                    "strict": True
+                }
             },
-            {
-                "role": "user",
-                "content": [{"type": "input_text", "text": input_query}]
-            }
-        ],
-        text={
-            "format": {
-                "type": "json_schema",
-                "name": "transaction_response",
-                "schema": TRANSACTION_SCHEMA,
-                "strict": True
-            }
-        },
-        reasoning={},
-        tools=[],
-        temperature=0.01,
-        max_output_tokens=16384,
-        top_p=1,
-        store=True
-    )
+            reasoning={},
+            tools=[],
+            temperature=0.01,
+            max_output_tokens=16384,
+            top_p=1,
+            store=True
+        )
 
-    try:
-        parsed = json.loads(response.output_text)
-        append_eval_jsonl(SYSTEM_MESSAGE, input_query, response.output_text, JSONL_EVAL_PATH)
-        transactions =  [
-            Transaction(
-                date=txn["date"],
-                amount=txn["amount"],
-                note=txn["note"],
-                txn_type=txn["txn_type"],
-                reason=txn["reason"],
-                category="MISC"
-            )
-            for txn in parsed["transactions"]
-        ]
-        confidence = parsed["confidence"]
-        llm_message = f"Extracting transactions: {len(transactions)} via LLM. Confidence: {confidence}"
-        llm_message += f"\n 📤 Running {config.model} responses api for {count_tokens(input_query)} input tokens"
-        llm_message += f"\n 📤 Running {config.model} responses api for {count_tokens(response.output_text)} output tokens"
-        
-        print(llm_message)
-        return transactions, llm_message
-    except (KeyError, ValueError, json.JSONDecodeError) as e:
-        raise ValueError(f"Failed to parse LLM response: {e}")
+        try:
+            parsed = json.loads(response.output_text)
+            append_eval_jsonl(SYSTEM_MESSAGE, input_query, response.output_text, JSONL_EVAL_PATH)
+            transactions = [
+                Transaction(
+                    date=txn["date"],
+                    amount=txn["amount"],
+                    note=txn["note"],
+                    txn_type=txn["txn_type"],
+                    reason=txn["reason"],
+                    category="MISC"
+                )
+                for txn in parsed["transactions"]
+            ]
+            confidence = parsed["confidence"]
+            llm_message = f"Extracting transactions: {len(transactions)} via LLM. Confidence: {confidence}"
+            llm_message += f"\n 📤 Running {config.model} responses api for {count_tokens(input_query)} input tokens"
+            llm_message += f"\n 📤 Running {config.model} responses api for {count_tokens(response.output_text)} output tokens"
+
+            print(llm_message)
+            all_transactions.extend(transactions)
+            all_messages.append(llm_message)
+
+        except (KeyError, ValueError, json.JSONDecodeError) as e:
+            raise ValueError(f"Failed to parse LLM response for input: {input_query}\nError: {e}")
+
+    return all_transactions, "\n\n".join(all_messages)
+
     
 PROCESSOR_DISPATCH: Dict[Type, Callable] = {
     NOOPProcessorConfig: do_nothing,
